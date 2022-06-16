@@ -5,7 +5,8 @@ class OTPField extends StatelessWidget {
   final bool autoFocus;
   final Function(String) onChange;
 
-  const OTPField(this.controller, this.autoFocus, this.onChange, {Key? key}) : super(key: key);
+  const OTPField(this.controller, this.autoFocus, this.onChange, {Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,9 @@ class OTPField extends StatelessWidget {
         keyboardType: TextInputType.number,
         controller: controller,
         maxLength: 1,
-        cursorColor: Theme.of(context).primaryColor,
+        cursorColor: Theme
+            .of(context)
+            .primaryColor,
         decoration: const InputDecoration(
             border: OutlineInputBorder(),
             counterText: '',
@@ -41,13 +44,16 @@ class _OTPTextFieldState extends State<OTPTextField> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> wList = [];
+    final List<TextEditingController> cList = [];
 
-   for(var i; i < 5; i++){
-     wList.add()
-   }
+    for (var i; i < 5; i++) {
+      final controller = TextEditingController();
+      wList.add(OTPField(controller, (i == 0) ? true : false, (p0) => null))
+      cList.add(controller);
+    }
 
 
-    return ;
+    return;
   }
 }
 
