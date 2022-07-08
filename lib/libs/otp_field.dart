@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 class OTPField extends StatelessWidget {
   final TextEditingController controller;
   final bool autoFocus;
-  final Function(String) onChange;
 
-  const OTPField(this.controller, this.autoFocus, this.onChange, {Key? key})
-      : super(key: key);
+  const OTPField(this.controller, this.autoFocus, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +17,14 @@ class OTPField extends StatelessWidget {
         keyboardType: TextInputType.number,
         controller: controller,
         maxLength: 1,
-        cursorColor: Theme
-            .of(context)
-            .primaryColor,
+        cursorColor: Theme.of(context).primaryColor,
         decoration: const InputDecoration(
             border: OutlineInputBorder(),
             counterText: '',
             hintStyle: TextStyle(color: Colors.black, fontSize: 20.0)),
-        onChanged: onChange,
+        onChanged: (value) {
+          FocusScope.of(context).nextFocus();
+        },
       ),
     );
   }
@@ -35,25 +33,44 @@ class OTPField extends StatelessWidget {
 class OTPTextField extends StatefulWidget {
   const OTPTextField({Key? key}) : super(key: key);
 
-
   @override
   State<OTPTextField> createState() => _OTPTextFieldState();
 }
 
 class _OTPTextFieldState extends State<OTPTextField> {
+  String textO = "";
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> wList = [];
     final List<TextEditingController> cList = [];
 
-    for (var i; i < 5; i++) {
-      final controller = TextEditingController();
-      wList.add(OTPField(controller, (i == 0) ? true : false, (p0) => null))
+    for (var i = 0; i < 3; i++) {
+      var controller = TextEditingController();
+      controller.addListener(() {
+        setState(() {
+          textO = "";
+          for (var element in cList) {
+            textO += element.text;
+          }
+        });
+      });
       cList.add(controller);
+      wList.add(OTPField(controller, (i == 0) ? true : false));
     }
 
-
-    return;
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemBuilder: (context, index) {
+        return wList[index];
+      },
+      separatorBuilder: (context, index) {
+        return const SizedBox(
+          width: 8,
+        );
+      },
+      shrinkWrap: true,
+      itemCount: wList.length,
+    );
   }
 }
-

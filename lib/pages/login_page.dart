@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_auth/libs/otp_field.dart';
+import 'package:flutter_firebase_auth/pages/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -52,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           editTextPhoneNumber(phoneController),
           const SizedBox(
-            height: 32,
+            height: 38,
           ),
           buttonGetOTP(context)
         ],
@@ -66,13 +68,13 @@ class _LoginPageState extends State<LoginPage> {
           const SizedBox(
             height: 54,
           ),
-          titleInstructions('Enter the OTP sent to', otpController.text, ''),
+          titleInstructions('Enter the OTP sent to', phoneController.text, ''),
           const SizedBox(
             height: 80,
           ),
-          editTextPhoneNumber(phoneController),
+          editTextVerification(otpController),
           const SizedBox(
-            height: 32,
+            height: 38,
           ),
           buttonGetOTP(context)
         ],
@@ -146,38 +148,69 @@ class _LoginPageState extends State<LoginPage> {
         ],
       );
 
-  Widget editTextVerification() => Row(
-    children: [
-      
-    ],
-  );
+  Widget editTextVerification(TextEditingController controller) => Row(
+        children: [
+          Flexible(flex: 2, child: Container()),
+          Flexible(
+              flex: 3,
+              child: TextField(
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.send,
+                textAlign: TextAlign.center,
+                controller: controller,
+              )),
+          Flexible(flex: 2, child: Container())
+        ],
+      );
 
   Widget buttonValidateCode(BuildContext context) => Row(
-    children: [
-      Flexible(flex: 1, child: Container()),
-      Flexible(
-          flex: 7,
-          child: SizedBox(
-            width: double.infinity,
-            height: 45,
-            child: ElevatedButton(
-              onPressed: () {},
-              child: const Text("VERIFY & PROCEED"),
-              style: ElevatedButton.styleFrom(
-                  primary: Theme.of(context).primaryColor),
-            ),
-          )),
-      Flexible(flex: 1, child: Container())
-    ],
-  );
-
+        children: [
+          Flexible(flex: 1, child: Container()),
+          Flexible(
+              flex: 7,
+              child: SizedBox(
+                width: double.infinity,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  child: const Text("VERIFY & PROCEED"),
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                ),
+              )),
+          Flexible(flex: 1, child: Container())
+        ],
+      );
 
   void sendConfirmationMessage(String phoneNumber, FirebaseAuth auth) async {
     await auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
-        verificationCompleted: (_) {},
-        verificationFailed: (_) {},
-        codeSent: (String verificationID, int? resendToken) {},
+        timeout: const Duration(seconds: 60),
+        verificationCompleted: (AuthCredential credential) async {
+          UserCredential userCredential =
+              await auth.signInWithCredential(credential);
+          if (userCredential.user != null) {
+            Navigator.pop(context);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const HomePage()));
+          }
+        },
+        verificationFailed: (FirebaseAuthException ex) {
+          // ignore: avoid_print
+          print(ex);
+        },
+        codeSent: (String verificationID, int? resendToken) async {
+          String smsCode = "";
+          PhoneAuthCredential credential = PhoneAuthProvider.credential(
+              verificationId: verificationID, smsCode: smsCode);
+          UserCredential userCredential =
+              await auth.signInWithCredential(credential);
+          if (userCredential.user != null) {
+            Navigator.pop(context);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const HomePage()));
+          }
+        },
         codeAutoRetrievalTimeout: (_) {});
   }
 }
